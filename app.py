@@ -5,7 +5,8 @@ import sys
 import json
 import config
 import requests
-import urllib.request
+import shutil
+from tqdm.auto import tqdm
 
 from bs4 import BeautifulSoup
 
@@ -94,7 +95,6 @@ def photo_save(ppost):
         TP += 1
 
     for img in photos_url:
-        #urllib.request.urlretrieve(img[1], img[0])
         r = requests.get(img[1])
         with open(img[0], 'wb') as outfile:
             outfile.write(r.content)
@@ -131,8 +131,15 @@ def video_save(vpost):
     print(f'v: {vpath}')
     TV += 1
 
-    urllib.request.urlretrieve(vpost.url_vid, vpath)
-
+    with requests.get(vpost.url_vid, stream=True) as r:
+        r.raise_for_status()
+        file_size = int(r.headers.get('Content-Length', 0))
+        desc = "(Unknown total file size)" if file_size == 0 else ""
+        
+        with open(vpath, 'wb') as f:
+            with tqdm.wrapattr(f, "write", miniters=1, total=file_size, desc=desc) as fout:
+                for chunk in r.iter_content(chunk_size=4096):
+                    fout.write(chunk)
 
 def text_save(tpost):
     tpost.ext = 'txt'
