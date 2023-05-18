@@ -166,12 +166,11 @@ def text_save(tpost):
 def parse_and_get(html_text):
     soup = BeautifulSoup(html_text, 'html.parser')
 
-    # name
-    name = soup.select('h5.mbsc-card-title.mbsc-bold span')[0].text
-    # date
-    post_date = soup.select('div.mbsc-card-subtitle')[0].text.strip()
-
     for pp in soup.select('div.mbsc-card.jffPostClass'):
+        # name
+        name = pp.select('h5.mbsc-card-title.mbsc-bold span')[0].text
+        # date
+        post_date = pp.select('div.mbsc-card-subtitle')[0].text.strip()
 
         ptext = pp.select('div.fr-view')
 
